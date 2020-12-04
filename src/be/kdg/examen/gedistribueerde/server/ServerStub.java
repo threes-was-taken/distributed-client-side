@@ -2,6 +2,7 @@
 package be.kdg.examen.gedistribueerde.server;
 
 import be.kdg.examen.gedistribueerde.client.Document;
+import be.kdg.examen.gedistribueerde.client.DocumentImpl;
 import be.kdg.examen.gedistribueerde.communication.MessageManager;
 import be.kdg.examen.gedistribueerde.communication.MethodCallMessage;
 import be.kdg.examen.gedistribueerde.communication.NetworkAddress;
@@ -41,21 +42,47 @@ public class ServerStub implements Server {
 
     @Override
     public Document create(String s) {
-        return null;
+        MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "create");
+        message.setParameter("stringToAdd", s);
+        messageManager.send(message, serverAddress);
+
+        MethodCallMessage resp = messageManager.wReceive();
+
+        if (!resp.getMethodName().equals("createNewDocument")){
+            throw new RuntimeException("Expected createNewDocument but instead got " + resp.getMethodName());
+        } else {
+            System.out.println("creating document has finished");
+
+            String newString = messageManager.wReceive().getParameter("newString");
+            return new DocumentImpl(newString);
+        }
     }
 
     @Override
     public void toUpper(Document document) {
+        MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toUpper");
+        message.setParameter("document", document.getText());
+        messageManager.send(message, serverAddress);
 
+       waitForAckMsg();
     }
 
     @Override
     public void toLower(Document document) {
+        MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toLower");
+        message.setParameter("document", document.getText());
+        messageManager.send(message, serverAddress);
 
+        waitForAckMsg();
     }
 
     @Override
     public void type(Document document, String text) {
+        MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "type");
+        message.setParameter("document", document.getText());
+        message.setParameter("text", text);
+        messageManager.send(message, serverAddress);
 
+        waitForAckMsg();
     }
 }

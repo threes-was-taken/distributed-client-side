@@ -13,9 +13,10 @@ public class DocumentSkeleton {
     private boolean isListening = false;
 
 
-    public DocumentSkeleton() {
+    public DocumentSkeleton(DocumentImpl document) {
         this.messageManager = new MessageManager();
         this.networkAddress = messageManager.getMyAddress();
+        this.document = document;
     }
 
     //======== LISTENER METHODS =================
@@ -91,7 +92,10 @@ public class DocumentSkeleton {
     }
 
     private void handleType(MethodCallMessage request) {
-
+        this.document.setText(request.getParameter("document.text"));
+        for (int i = 0; i < request.getParameter("type").length() - 1; i++) {
+            this.document.append(request.getParameter("type").charAt(i));
+        }
     }
 
     private void handleToLower(MethodCallMessage request) {
