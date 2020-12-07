@@ -1,11 +1,9 @@
 package be.kdg.examen.gedistribueerde;
 
 import be.kdg.examen.gedistribueerde.client.Client;
-import be.kdg.examen.gedistribueerde.client.ClientFrame;
 import be.kdg.examen.gedistribueerde.client.DocumentImpl;
 import be.kdg.examen.gedistribueerde.client.DocumentSkeleton;
 import be.kdg.examen.gedistribueerde.communication.NetworkAddress;
-import be.kdg.examen.gedistribueerde.server.Server;
 import be.kdg.examen.gedistribueerde.server.ServerStub;
 
 public class StartDistributedClient {
@@ -33,8 +31,10 @@ public class StartDistributedClient {
         //Set document on skeleton
         documentSkeleton.setDocument(document);
 
+        new Thread(documentSkeleton).start();
+
         //Set listen address in document server stub
-        serverStub.setReceiveAddress(documentSkeleton.getNetworkAddress());
+        serverStub.setSkeletonAddress(documentSkeleton.getNetworkAddress());
 
         //create client
         Client client = new Client(serverStub, document);

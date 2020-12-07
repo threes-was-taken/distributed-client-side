@@ -9,24 +9,20 @@ import be.kdg.examen.gedistribueerde.communication.NetworkAddress;
 
 public class ServerStub implements Server {
     private final MessageManager messageManager;
-    private final NetworkAddress serverAddress;
-    private NetworkAddress receiveAddress;
+    private final NetworkAddress documentServerAddress;
+    private NetworkAddress skeletonAddress;
 
-    public ServerStub(NetworkAddress serverAddress) {
-        this.serverAddress = serverAddress;
+    public ServerStub(NetworkAddress documentServerAddress) {
+        this.documentServerAddress = documentServerAddress;
         messageManager = new MessageManager();
     }
 
     //======== PRIVATE METHODS =================
     //checks for empty messages and waits for a reply
-    private void waitForAckMsg(){
-        String val = "";
-        while (!"Ok".equals(val)){
-            MethodCallMessage response = messageManager.wReceive();
-            if (!"result".equals(response.getMethodName())){
-                continue;
-            }
-            val = response.getParameter("result");
+    private static void checkEmptyReply(MessageManager messageManager) {
+        MethodCallMessage reply = messageManager.wReceive();
+        if (!"ok".equals(reply.getMethodName())) {
+            throw new RuntimeException("Expected Ok, got " + reply.getMethodName());
         }
     }
 
@@ -34,61 +30,65 @@ public class ServerStub implements Server {
     @Override
     public void log(Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "log");
+        // send IP and PORT to server for call by ref ( by sending the location ( ip address and port ) to the server we have a call by reference situation
+        // ... since the sent location is our reference.
+        message.setParameter("documentAddress", skeletonAddress.toString());
         message.setParameter("documentText", document.getText());
-        messageManager.send(message, serverAddress);
+        messageManager.send(message, documentServerAddress);
 
-        waitForAckMsg();
+        MethodCallMessage resp = this.messageManager.wReceive();
+        if (!resp.getMethodName().equals("logResponse")) {
+            throw new RuntimeException("Expected log message reply, instead got " + resp.getMethodName());
+        }
     }
 
     @Override
     public Document create(String s) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "create");
         message.setParameter("stringToAdd", s);
-        messageManager.send(message, serverAddress);
+        messageManager.send(message, documentServerAddress);
 
         MethodCallMessage resp = messageManager.wReceive();
 
-        if (!resp.getMethodName().equals("createNewDocument")){
+        if (!resp.getMethodName().equals("createNewDocument")) {
             throw new RuntimeException("Expected createNewDocument but instead got " + resp.getMethodName());
         } else {
             System.out.println("creating document has finished");
-
-            String newString = messageManager.wReceive().getParameter("newString");
-            return new DocumentImpl(newString);
+            return new DocumentImpl(resp.getParameter("newString"));
         }
     }
 
     @Override
-    public void toUpper(Document document) {
+    public void toUpper(@CallByRef Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toUpper");
-        message.setParameter("document", document.getText());
-        messageManager.send(message, serverAddress);
+        message.setParameter("documentAddress", skeletonAddress.toString());
+        messageManager.send(message, documentServerAddress);
 
-       waitForAckMsg();
+        checkEmptyReply(this.messageManager);
     }
 
     @Override
-    public void toLower(Document document) {
+    public void toLower(@CallByRef Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toLower");
-        message.setParameter("document", document.getText());
-        messageManager.send(message, serverAddress);
+        message.setParameter("documentAddress", skeletonAddress.toString());
+        messageManager.send(message, documentServerAddress);
 
-        waitForAckMsg();
+        checkEmptyReply(this.messageManager);
     }
 
     @Override
-    public void type(Document document, String text) {
+    public void type(@CallByRef Document document, String text) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "type");
-        message.setParameter("document", document.getText());
+        message.setParameter("documentAddress", skeletonAddress.toString());
         message.setParameter("text", text);
-        messageManager.send(message, serverAddress);
+        messageManager.send(message, documentServerAddress);
 
-        waitForAckMsg();
+        checkEmptyReply(this.messageManager);
     }
 
     //======= SETTERS ================
 
-    public void setReceiveAddress(NetworkAddress receiveAddress) {
-        this.receiveAddress = receiveAddress;
+    public void setSkeletonAddress(NetworkAddress skeletonAddress) {
+        this.skeletonAddress = skeletonAddress;
     }
 }

@@ -23,11 +23,11 @@ public class Client {
         document.setText(doc.getText());
         server.log(document);
 
-        /*// stap 3
+        // stap 3
         server.toUpper(document);
         server.log(document);
         server.toLower(document);
-        server.log(document);*/
+        server.log(document);
 
        /* // stap 4
         server.type(document, "Hello, world!");

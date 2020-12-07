@@ -6,7 +6,7 @@ import be.kdg.examen.gedistribueerde.communication.MethodCallMessage;
 import be.kdg.examen.gedistribueerde.communication.NetworkAddress;
 
 
-public class DocumentSkeleton {
+public class DocumentSkeleton implements Runnable{
     private final NetworkAddress networkAddress;
     private final MessageManager messageManager;
     private Document document;
@@ -18,30 +18,28 @@ public class DocumentSkeleton {
         this.networkAddress = messageManager.getMyAddress();
     }
 
-    //======== LISTENER METHODS =================
-    public void listen(){
-        //check if document is not null
-        if (this.document == null){
-            System.err.println("Unable to start listening if document is null");
+    // == LISTENER =========================
+    public void listen() {
+        // check if client has been set
+        if (this.document == null) {
+            System.err.println("I can't start up if there's no document ready");
             System.exit(1);
         }
 
-        System.out.println("Started listening on " + this.networkAddress);
-
         this.isListening = true;
-        while (isListening){
+        while (isListening) {
 
-            //wait sync for req
+            // wait sync for request
             MethodCallMessage request = messageManager.wReceive();
 
-            //handle incoming request
+            // handle request
             this.handleRequest(request);
         }
     }
 
     public void stopListening() {
-        if (!this.isListening){
-            System.err.println("Unable to stop, currently listening");
+        if (!this.isListening) {
+            System.err.println("I can't stop now, i'm listening");
             return;
         }
 
@@ -101,9 +99,7 @@ public class DocumentSkeleton {
     private void handleAppend(MethodCallMessage request) {
         String text = request.getParameter("toAppend");
 
-        for (int i = 0; i < text.length() -1; i++) {
-            this.document.append(text.charAt(i));
-        }
+        this.document.append(text.charAt(0));
 
         ack(request.getOriginator());
     }
@@ -113,7 +109,8 @@ public class DocumentSkeleton {
 
         this.document.setText(text);
 
-        ack(request.getOriginator());
+        MethodCallMessage resp = new MethodCallMessage(messageManager.getMyAddress(), "setText");
+        messageManager.send(resp, request.getOriginator());
     }
 
     private void handleGetText(MethodCallMessage request) {
@@ -126,4 +123,8 @@ public class DocumentSkeleton {
         this.messageManager.send(resp, request.getOriginator());
     }
 
+    @Override
+    public void run() {
+        listen();
+    }
 }
