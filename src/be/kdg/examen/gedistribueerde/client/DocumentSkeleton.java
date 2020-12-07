@@ -13,10 +13,9 @@ public class DocumentSkeleton {
     private boolean isListening = false;
 
 
-    public DocumentSkeleton(DocumentImpl document) {
+    public DocumentSkeleton() {
         this.messageManager = new MessageManager();
         this.networkAddress = messageManager.getMyAddress();
-        this.document = document;
     }
 
     //======== LISTENER METHODS =================
@@ -64,20 +63,17 @@ public class DocumentSkeleton {
         System.out.println("Received request" + request);
 
         switch (request.getMethodName()){
-            case "log":
-                this.handleLog(request);
+            case "getText":
+                handleGetText(request);
                 break;
-            case "create":
-                this.handleCreate(request);
+            case "setText":
+                handleSetText(request);
                 break;
-            case"toUpper":
-                this.handleToUpper(request);
+            case "appendText":
+                handleAppend(request);
                 break;
-            case "toLower":
-                this.handleToLower(request);
-                break;
-            case "type":
-                this.handleType(request);
+            case "setChar":
+                handleSetChar(request);
                 break;
             default:
                 System.err.println("Unrecognized request " + request.getMethodName() + " received.");
@@ -91,27 +87,43 @@ public class DocumentSkeleton {
         this.messageManager.send(ack, to);
     }
 
-    private void handleType(MethodCallMessage request) {
-        this.document.setText(request.getParameter("document.text"));
-        for (int i = 0; i < request.getParameter("type").length() - 1; i++) {
-            this.document.append(request.getParameter("type").charAt(i));
+    //======== DELEGATIONS =================
+
+    private void handleSetChar(MethodCallMessage request) {
+        int position = Integer.parseInt(request.getParameter("positionChar").trim());
+        char c = request.getParameter("character").trim().charAt(0);
+
+        this.document.setChar(position, c);
+
+        ack(request.getOriginator());
+    }
+
+    private void handleAppend(MethodCallMessage request) {
+        String text = request.getParameter("toAppend");
+
+        for (int i = 0; i < text.length() -1; i++) {
+            this.document.append(text.charAt(i));
         }
+
+        ack(request.getOriginator());
     }
 
-    private void handleToLower(MethodCallMessage request) {
+    private void handleSetText(MethodCallMessage request) {
+        String text = request.getParameter("textToSet");
 
+        this.document.setText(text);
+
+        ack(request.getOriginator());
     }
 
-    private void handleToUpper(MethodCallMessage request) {
+    private void handleGetText(MethodCallMessage request) {
+        //get text from doc
+        String text = this.document.getText();
 
-    }
-
-    private void handleCreate(MethodCallMessage request) {
-
-    }
-
-    private void handleLog(MethodCallMessage request) {
-
+        //send text to server as response
+        MethodCallMessage resp = new MethodCallMessage(this.messageManager.getMyAddress(), request.getMethodName());
+        resp.setParameter("value", text);
+        this.messageManager.send(resp, request.getOriginator());
     }
 
 }

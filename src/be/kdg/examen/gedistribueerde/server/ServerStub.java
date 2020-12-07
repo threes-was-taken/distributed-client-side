@@ -34,7 +34,7 @@ public class ServerStub implements Server {
     @Override
     public void log(Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "log");
-        message.setParameter("document.text", document.getText());
+        message.setParameter("documentText", document.getText());
         messageManager.send(message, serverAddress);
 
         waitForAckMsg();
@@ -84,5 +84,11 @@ public class ServerStub implements Server {
         messageManager.send(message, serverAddress);
 
         waitForAckMsg();
+    }
+
+    //======= SETTERS ================
+
+    public void setReceiveAddress(NetworkAddress receiveAddress) {
+        this.receiveAddress = receiveAddress;
     }
 }
