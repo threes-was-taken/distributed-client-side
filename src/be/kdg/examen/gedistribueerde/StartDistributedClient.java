@@ -31,10 +31,10 @@ public class StartDistributedClient {
         //Set document on skeleton
         documentSkeleton.setDocument(document);
 
-        new Thread(documentSkeleton).start();
-
         //Set listen address in document server stub
         serverStub.setSkeletonAddress(documentSkeleton.getNetworkAddress());
+
+        new Thread(documentSkeleton).start();
 
         //create client
         Client client = new Client(serverStub, document);

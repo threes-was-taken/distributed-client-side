@@ -21,7 +21,7 @@ public class ServerStub implements Server {
     //checks for empty messages and waits for a reply
     private static void checkEmptyReply(MessageManager messageManager) {
         MethodCallMessage reply = messageManager.wReceive();
-        if (!"ok".equals(reply.getMethodName())) {
+        if (!"ack".equals(reply.getMethodName())) {
             throw new RuntimeException("Expected Ok, got " + reply.getMethodName());
         }
     }

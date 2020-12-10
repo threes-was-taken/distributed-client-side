@@ -79,21 +79,21 @@ public class DocumentSkeleton implements Runnable{
         }
     }
 
-    private void ack(NetworkAddress to){
-        MethodCallMessage ack = new MethodCallMessage(this.messageManager.getMyAddress(), "ack");
-        ack.setParameter("result", "ok");
-        this.messageManager.send(ack, to);
+    //======== PRIVATE METHODS =================
+    public static void sendEmptyReply(MethodCallMessage request, MessageManager messageManager) {
+        MethodCallMessage reply = new MethodCallMessage(messageManager.getMyAddress(), "ack");
+        messageManager.send(reply, request.getOriginator());
     }
 
     //======== DELEGATIONS =================
 
     private void handleSetChar(MethodCallMessage request) {
-        int position = Integer.parseInt(request.getParameter("positionChar").trim());
-        char c = request.getParameter("character").trim().charAt(0);
+        int position = Integer.parseInt(request.getParameter("positionChar"));
+        char c = request.getParameter("character").charAt(0);
 
         this.document.setChar(position, c);
 
-        ack(request.getOriginator());
+        sendEmptyReply(request, messageManager);
     }
 
     private void handleAppend(MethodCallMessage request) {
@@ -101,7 +101,7 @@ public class DocumentSkeleton implements Runnable{
 
         this.document.append(text.charAt(0));
 
-        ack(request.getOriginator());
+        sendEmptyReply(request, messageManager);
     }
 
     private void handleSetText(MethodCallMessage request) {

@@ -15,8 +15,8 @@ public class Client {
     }
 
     public void run() {
-        /*// stap 1
-        server.log(new DocumentImpl("Dit is een testje"));*/
+        // stap 1
+        server.log(new DocumentImpl("Dit is een testje"));
 
         // stap 2
         Document doc = server.create("Dit is nog een testje...");
@@ -29,8 +29,8 @@ public class Client {
         server.toLower(document);
         server.log(document);
 
-       /* // stap 4
+        // stap 4
         server.type(document, "Hello, world!");
-        server.log(document);*/
+        server.log(document);
     }
 }
