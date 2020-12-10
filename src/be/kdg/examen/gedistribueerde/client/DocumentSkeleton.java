@@ -5,7 +5,6 @@ import be.kdg.examen.gedistribueerde.communication.MessageManager;
 import be.kdg.examen.gedistribueerde.communication.MethodCallMessage;
 import be.kdg.examen.gedistribueerde.communication.NetworkAddress;
 
-
 public class DocumentSkeleton implements Runnable{
     private final NetworkAddress networkAddress;
     private final MessageManager messageManager;
@@ -20,7 +19,7 @@ public class DocumentSkeleton implements Runnable{
 
     // == LISTENER =========================
     public void listen() {
-        // check if client has been set
+        // check if client/document has been set
         if (this.document == null) {
             System.err.println("I can't start up if there's no document ready");
             System.exit(1);
@@ -35,15 +34,6 @@ public class DocumentSkeleton implements Runnable{
             // handle request
             this.handleRequest(request);
         }
-    }
-
-    public void stopListening() {
-        if (!this.isListening) {
-            System.err.println("I can't stop now, i'm listening");
-            return;
-        }
-
-        this.isListening = false;
     }
 
     //======== SETTERS =================

@@ -22,7 +22,7 @@ public class ServerStub implements Server {
     private static void checkEmptyReply(MessageManager messageManager) {
         MethodCallMessage reply = messageManager.wReceive();
         if (!"ack".equals(reply.getMethodName())) {
-            throw new RuntimeException("Expected Ok, got " + reply.getMethodName());
+            throw new RuntimeException("Expected ack, got " + reply.getMethodName());
         }
     }
 
@@ -38,7 +38,7 @@ public class ServerStub implements Server {
 
         MethodCallMessage resp = this.messageManager.wReceive();
         if (!resp.getMethodName().equals("logResponse")) {
-            throw new RuntimeException("Expected log message reply, instead got " + resp.getMethodName());
+            throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
         }
     }
 
