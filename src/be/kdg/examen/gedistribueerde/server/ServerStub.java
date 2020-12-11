@@ -72,7 +72,7 @@ public class ServerStub implements Server {
         MethodCallMessage resp = this.messageManager.wReceive();
 
         if (!resp.getMethodName().equals("toUpperResponse")) {
-            throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
+            throw new RuntimeException("Expected toUpper message response, instead got " + resp.getMethodName());
         } else {
             document.setText(resp.getParameter("upper"));
             System.out.println(document.getText());
@@ -96,7 +96,7 @@ public class ServerStub implements Server {
 
         MethodCallMessage resp = this.messageManager.wReceive();
         if (!resp.getMethodName().equals("toLowerResponse")) {
-            throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
+            throw new RuntimeException("Expected toLower message response, instead got " + resp.getMethodName());
         } else {
             document.setText(resp.getParameter("lower"));
             System.out.println(document.getText());
@@ -107,14 +107,12 @@ public class ServerStub implements Server {
     @Override
     public void type(@CallByRef Document document, String text) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "type");
-        /* document call by ref
+        // document call by ref
         message.setParameter("documentAddress", skeletonAddress.toString());
-        */
-        message.setParameter("document", document.getText());
         message.setParameter("text", text);
         messageManager.send(message, documentServerAddress);
 
-        checkEmptyReply(this.messageManager);
+       checkEmptyReply(messageManager);
     }
 
     //======= SETTERS ================
