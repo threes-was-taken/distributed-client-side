@@ -32,7 +32,6 @@ public class ServerStub implements Server {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "log");
         // send IP and PORT to server for call by ref ( by sending the location ( ip address and port ) to the server we have a call by reference situation
         // ... since the sent location is our reference.
-        message.setParameter("documentAddress", skeletonAddress.toString());
         message.setParameter("documentText", document.getText());
         messageManager.send(message, documentServerAddress);
 
@@ -61,25 +60,54 @@ public class ServerStub implements Server {
     @Override
     public void toUpper(@CallByRef Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toUpper");
-        message.setParameter("documentAddress", skeletonAddress.toString());
+        //call by ref
+        /*message.setParameter("documentAddress", skeletonAddress.toString());*/
+        /*checkEmptyReply(this.messageManager);*/
+
+
+        // call by val
+        message.setParameter("upper", document.getText());
         messageManager.send(message, documentServerAddress);
 
-        checkEmptyReply(this.messageManager);
+        MethodCallMessage resp = this.messageManager.wReceive();
+        if (!resp.getMethodName().equals("toUpperResponse")) {
+            throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
+        } else {
+            System.out.println(resp.getParameter("upper"));
+            System.out.println("Changing document to ALL CAPS has finished");
+        }
     }
 
     @Override
     public void toLower(@CallByRef Document document) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "toLower");
+       /*
+       call by ref
         message.setParameter("documentAddress", skeletonAddress.toString());
+        */
+
+        //call by val
+        message.setParameter("lower", document.getText());
         messageManager.send(message, documentServerAddress);
 
-        checkEmptyReply(this.messageManager);
+        /*checkEmptyReply(this.messageManager);*/
+
+        MethodCallMessage resp = this.messageManager.wReceive();
+        if (!resp.getMethodName().equals("toLowerResponse")) {
+            throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
+        } else {
+            System.out.println(resp.getParameter("lower"));
+            System.out.println("Changing document to lower caps has finished");
+        }
     }
 
     @Override
     public void type(@CallByRef Document document, String text) {
         MethodCallMessage message = new MethodCallMessage(messageManager.getMyAddress(), "type");
+        /* document call by ref
         message.setParameter("documentAddress", skeletonAddress.toString());
+        */
+        message.setParameter("document", document.getText());
         message.setParameter("text", text);
         messageManager.send(message, documentServerAddress);
 
