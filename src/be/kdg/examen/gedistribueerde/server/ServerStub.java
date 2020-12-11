@@ -70,10 +70,12 @@ public class ServerStub implements Server {
         messageManager.send(message, documentServerAddress);
 
         MethodCallMessage resp = this.messageManager.wReceive();
+
         if (!resp.getMethodName().equals("toUpperResponse")) {
             throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
         } else {
-            System.out.println(resp.getParameter("upper"));
+            document.setText(resp.getParameter("upper"));
+            System.out.println(document.getText());
             System.out.println("Changing document to ALL CAPS has finished");
         }
     }
@@ -96,7 +98,8 @@ public class ServerStub implements Server {
         if (!resp.getMethodName().equals("toLowerResponse")) {
             throw new RuntimeException("Expected log message response, instead got " + resp.getMethodName());
         } else {
-            System.out.println(resp.getParameter("lower"));
+            document.setText(resp.getParameter("lower"));
+            System.out.println(document.getText());
             System.out.println("Changing document to lower caps has finished");
         }
     }
